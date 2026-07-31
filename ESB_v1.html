@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ESB · Employee Service Blueprint</title>
+<script>
+  // Ẩn cảnh báo "cdn.tailwindcss.com should not be used in production" (chỉ demo, không ảnh hưởng chức năng)
+  (function () {
+    const originalWarn = console.warn;
+    console.warn = function (...args) {
+      if (typeof args[0] === "string" && args[0].includes("cdn.tailwindcss.com should not be used in production")) {
+        return;
+      }
+      originalWarn.apply(console, args);
+    };
+  })();
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD,opsz@100..700,0..1,-50..200,20..48&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          /* ── Warm Paper Design System (reused from DSB) ── */
+          "on-surface": "#161616",
+          "on-surface-variant": "#737373",
+          "surface": "#FAF9F6",
+          "surface-bright": "#FFFFFF",
+          "surface-dim": "#EBEBEB",
+          "surface-container-lowest": "#FFFFFF",
+          "surface-container-low": "#F5F5F5",
+          "surface-container": "#EDE9E2",
+          "surface-container-high": "#EBF6F3",
+          "surface-container-highest": "#EBEBEB",
+          "outline": "#A3A3A3",
+          "outline-variant": "#D8D3C8",
+          "vnd-primary-50": "#C4E5DF",
+          "vnd-primary-100": "#EBEBEB",
+          "vnd-primary-200": "#DADADA",
+          "vnd-primary-400": "#6B6157",
+          "vnd-primary-500": "#161616",
+          "vnd-primary-700": "#2A2A2A",
+          "vnd-primary-900": "#161616",
+          "vnd-primary-950": "#0D0D0D",
+          "vnd-accent-green": "#16A34A",
+          "vnd-accent-amber": "#3A9487",
+          "vnd-warning": "#C2550A",
+          "vnd-danger": "#DC2626",
+          "vnd-neutral-50": "#FAF9F6",
+          "vnd-neutral-100": "#C4E5DF",
+          "vnd-neutral-950": "#161616",
+          "primary": "#161616",
+          "primary-container": "#EBEBEB",
+          "on-primary": "#FFFFFF",
+          "secondary-container": "#C6EDD8",
+          "on-secondary-fixed-variant": "#14532D",
+          "tertiary-fixed": "#F5DDD0",
+          "tertiary": "#7C4A1E",
+          "on-tertiary-fixed-variant": "#6B3A14",
+          "error-container": "#FEE2E2",
+          "on-error-container": "#991B1B"
+        },
+        borderRadius: {
+          DEFAULT: "0.5rem", sm: "0.25rem", lg: "0.5rem", xl: "0.5rem", "2xl": "0.5rem", "3xl": "0.75rem", full: "9999px"
+        },
+        fontFamily: {
+          sans: ["Inter", "system-ui", "sans-serif"],
+          display: ["Inter", "system-ui", "sans-serif"],
+          mono: ["Inter", "system-ui", "sans-serif"]
+        },
+        boxShadow: {
+          "xs": "0 1px 2px rgba(60, 45, 30, 0.05)",
+          "soft": "0 2px 8px -2px rgba(60, 45, 30, 0.07), 0 6px 18px -8px rgba(60, 45, 30, 0.08)",
+          "lift": "0 10px 30px -12px rgba(60, 45, 30, 0.16), 0 2px 6px rgba(60, 45, 30, 0.05)",
+          "brand": "0 10px 30px -10px rgba(61, 53, 48, 0.30)"
+        }
+      }
+    }
+  };
+</script>
+<style>
+  html, body, #root { height: 100%; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #F5F5F5;
+    color: #161616;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display { font-family: 'Inter', system-ui, sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; user-select: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #DADADA; border-radius: 99px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .warm-sidebar {
+    background: #FFFFFF;
+    border-radius: 0.75rem;
+    border: 1px solid #EBEBEB;
+    box-shadow: 0 2px 8px -2px rgba(60,45,30,0.07), 0 6px 18px -8px rgba(60,45,30,0.08);
+  }
+  .warm-main {
+    background: #FFFFFF;
+    border-radius: 0.75rem;
+    border: 1px solid #EBEBEB;
+    box-shadow: 0 2px 8px -2px rgba(60,45,30,0.07), 0 6px 18px -8px rgba(60,45,30,0.08);
+  }
+  .no-focus-box:focus, .no-focus-box:focus-visible { outline: none !important; outline-offset: 0 !important; box-shadow: none !important; }
+  *:focus-visible { outline: 2px solid #161616; outline-offset: 2px; border-radius: 6px; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .animate-fade-in { animation: fade-in .25s ease-out both; }
+  @keyframes dash-rotate { to { stroke-dashoffset: 0; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// =============== Icon ===============
+function Icon({ name, className = "", filled = false, weight = 400, size = 20, style }) {
+  const fvs = `'FILL' ${filled ? 1 : 0}, 'wght' ${weight}, 'GRAD' 0, 'opsz' 24`;
+  return (
+    <span className={`material-symbols-outlined select-none ${className}`}
+      style={{ fontVariationSettings: fvs, fontSize: size, lineHeight: 1, ...(style || {}) }}>
+      {name}
+    </span>
+  );
+}
+
+function Avatar({ initials, size = 32, tone = "teal" }) {
+  const palette = {
+    teal:  ["#3A9487", "#EBF6F3"],
+    blue:  ["#1B2A4A", "#C4E5DF"],
+    purple: ["#6D28D9", "#F5F3FF"],
+    "dashboard-user": ["#2D6457", "#C4E5DF"],
+  };
+  const [fg, bg] = palette[tone] || palette.teal;
+  return (
+    <div className="rounded-full flex items-center justify-center font-display font-bold select-none"
+      style={{ width: size, height: size, background: bg, color: fg, fontSize: size * 0.38 }}>
+      {initials}
+    </div>
+  );
+}
+
+// =============== Shared UI primitives — y nguyên từ DSB gốc ===============
+function Tag({ children, tone = "neutral", size = "sm", icon, onClick, className = "" }) {
+  const tones = {
+    neutral: { bg: "bg-[#F5F5F5]", fg: "text-[#737373]", ring: "ring-[#EBEBEB]" },
+    navy:    { bg: "bg-[#EBF0F7]", fg: "text-[#1B2A4A]", ring: "ring-[#CBD4E8]" },
+    teal:    { bg: "bg-[#EBF6F3]", fg: "text-[#3A9487]", ring: "ring-[#C4E5DF]" },
+    green:   { bg: "bg-[#F0FDF4]", fg: "text-[#16A34A]", ring: "ring-[#BBF7D0]" },
+    gold:    { bg: "bg-[#FBF3E2]", fg: "text-[#BB892A]", ring: "ring-[#F5DFA4]" },
+    amber:   { bg: "bg-[#FBF3E2]", fg: "text-[#BB892A]", ring: "ring-[#F5DFA4]" },
+    red:     { bg: "bg-[#FBE9E8]", fg: "text-[#C0392B]", ring: "ring-[#F5C0BC]" },
+    purple:  { bg: "bg-[#F5F3FF]", fg: "text-[#6D28D9]", ring: "ring-[#DDD6FE]" },
+    dark:    { bg: "bg-[#161616]", fg: "text-white",     ring: "ring-[#333]" },
+  };
+  const sizes = {
+    xs: "text-[10px] px-1.5 h-5 gap-0.5",
+    sm: "text-[12px] px-2 h-6 gap-1",
+    md: "text-[14px] px-2.5 h-7 gap-1.5",
+  };
+  const t = tones[tone] || tones.neutral;
+  const clickCls = onClick ? "cursor-pointer hover:opacity-80 transition-opacity" : "";
+  return (
+    <span onClick={onClick} className={`inline-flex items-center rounded-md font-semibold ring-1 ${t.bg} ${t.fg} ${t.ring} ${sizes[size]} ${clickCls} ${className}`}>
+      {icon && <Icon name={icon} size={size === "md" ? 13 : 11} />}
+      {children}
+    </span>
+  );
+}
+
+function Badge({ children, tone = "neutral", size = "sm", icon, className = "" }) {
+  const tones = {
+    neutral: "bg-[#F5F5F5] text-[#737373]",
+    blue:    "bg-[#C4E5DF] text-[#1B2A4A]",
+    green:   "bg-[#F0FDF4] text-[#16A34A]",
+    teal:    "bg-[#EBF6F3] text-[#3A9487]",
+    amber:   "bg-[#FBF3E2] text-[#BB892A]",
+    dark:    "bg-[#3A9487] text-white",
+    outline: "border border-[#EBEBEB] text-[#737373]",
+  };
+  const sizes = {
+    xs: "text-[10px] px-1.5 h-5 gap-1",
+    sm: "text-[12px] px-2 h-6 gap-1",
+    md: "text-[14px] px-2.5 h-7 gap-1.5",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-full font-semibold tracking-wide ${tones[tone]} ${sizes[size]} ${className}`}>
+      {icon && <Icon name={icon} size={size === "md" ? 14 : 12} />}
+      {children}
+    </span>
+  );
+}
+
+function Button({ children, tone = "primary", size = "md", icon, iconRight, className = "", as: As = "button", ...props }) {
+  const sizes = {
+    xs: "h-7 px-2.5 text-[12px] gap-1.5 rounded-md",
+    sm: "h-8 px-3 text-[14px] gap-1.5 rounded-lg",
+    md: "h-10 px-4 text-sm gap-2 rounded-lg",
+    lg: "h-12 px-5 text-[16px] gap-2 rounded-lg",
+  };
+  const tones = {
+    primary: "bg-[#3A9487] text-white hover:bg-[#2D6457] active:scale-[.98] shadow-xs",
+    dark:    "bg-[#161616] text-white hover:bg-[#2A2A2A] active:scale-[.98]",
+    soft:    "bg-[#EBF6F3] text-[#3A9487] hover:bg-[#C4E5DF]",
+    neutral: "bg-[#F5F5F5] text-[#474747] ring-1 ring-[#EBEBEB] hover:bg-[#EBEBEB]",
+    outline: "bg-white text-[#161616] ring-1 ring-[#DADADA] hover:bg-[#F5F5F5]",
+    ghost:   "text-[#737373] hover:bg-[#F5F5F5]",
+  };
+  return (
+    <As className={`inline-flex items-center font-display font-medium whitespace-nowrap transition-all ${sizes[size]} ${tones[tone]} ${className}`} {...props}>
+      {icon && <Icon name={icon} size={size === "lg" ? 18 : 16} weight={500} />}
+      {children}
+      {iconRight && <Icon name={iconRight} size={size === "lg" ? 18 : 16} weight={500} />}
+    </As>
+  );
+}
+
+function Card({ children, className = "", style, padded = true, hoverable = false }) {
+  const hasBg = className.includes("bg-") || !!style;
+  return (
+    <section style={style} className={`
+      ${hasBg ? "" : "bg-white"}
+      rounded-lg shadow-soft ring-1 ring-[#EBEBEB]/60
+      ${padded ? "p-6" : ""}
+      ${hoverable ? "transition-shadow hover:shadow-lift" : ""}
+      ${className}
+    `}>
+      {children}
+    </section>
+  );
+}
+
+function Tabs({ value, onChange, tabs, dense = false, className = "" }) {
+  return (
+    <div className={`flex items-center gap-1 ${dense ? "" : "border-b border-[#EBEBEB]"} ${className}`}>
+      {tabs.map(t => {
+        const active = t.id === value;
+        return (
+          <button key={t.id} onClick={() => onChange(t.id)}
+            className={`relative inline-flex items-center gap-2 font-display font-medium transition-all
+              ${dense ? "px-3 py-1.5 rounded-md text-[14px]" : "px-4 py-3 text-sm"}
+              ${active ? (dense ? "bg-[#3A9487] text-white" : "text-[#161616]") : (dense ? "text-[#737373] hover:bg-[#F5F5F5]" : "text-[#737373] hover:text-[#161616]")}`}>
+            {t.icon && <Icon name={t.icon} size={16} />}
+            <span>{t.label}</span>
+            {!dense && active && <span className="absolute left-2 right-2 -bottom-px h-0.5 rounded-full bg-[#161616]"></span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function Modal({ open, onClose, title, sub, children, footer, size = "md" }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onClose?.(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+  if (!open) return null;
+  const widths = { sm: "max-w-md", md: "max-w-2xl", lg: "max-w-4xl" };
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-6 overflow-y-auto animate-fade-in">
+      <div className="absolute inset-0 bg-[#161616]/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className={`relative z-10 w-full ${widths[size]} bg-white rounded-lg shadow-lift overflow-hidden my-auto`}>
+        <div className="flex items-start justify-between gap-6 px-6 py-5 border-b border-[#EBEBEB]">
+          <div>
+            <h2 className="font-display text-[17px] font-bold text-[#161616]">{title}</h2>
+            {sub && <p className="text-[13px] text-[#737373] mt-1">{sub}</p>}
+          </div>
+          <button className="w-8 h-8 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center text-[#737373]" onClick={onClose}>
+            <Icon name="close" size={20} />
+          </button>
+        </div>
+        {children && <div className="px-6 py-5 max-h-[70vh] overflow-y-auto scrollbar-thin">{children}</div>}
+        {footer && <div className="px-6 py-4 border-t border-[#EBEBEB] flex items-center justify-end gap-2 bg-[#F5F5F5]">{footer}</div>}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// Field wrapper — ring nằm trên div bọc ngoài, input/textarea bên trong border-0 (đúng pattern DSB, tránh viền đúp do Tailwind forms plugin)
+function TextField({ value, onChange, placeholder, dense = true, className = "" }) {
+  return (
+    <div className={`${dense ? "h-9" : "h-10"} rounded-lg bg-white ring-1 ring-[#DADADA] focus-within:ring-[#3A9487] transition-all flex items-center px-2 ${className}`}>
+      <input value={value} onChange={onChange} placeholder={placeholder}
+        className={`no-focus-box flex-1 min-w-0 bg-transparent border-0 outline-none p-0 ${dense ? "text-[12.5px]" : "text-[14px]"} text-[#161616] placeholder:text-[#A3A3A3]`} />
+    </div>
+  );
+}
+
+function TextAreaField({ value, onChange, placeholder, rows = 2, dense = true, className = "" }) {
+  return (
+    <div className={`rounded-lg bg-white ring-1 ring-[#DADADA] focus-within:ring-[#3A9487] transition-all px-2 py-1.5 ${className}`}>
+      <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows}
+        className={`no-focus-box w-full bg-transparent border-0 outline-none p-0 ${dense ? "text-[12.5px]" : "text-[14px]"} text-[#161616] placeholder:text-[#A3A3A3] resize-y leading-relaxed`} />
+    </div>
+  );
+}
+
+// =============== Nav config ===============
+// Sidebar y hệt bản gốc DSB: Dashboard riêng ở trên, rồi "4 LA BÀN" gồm dGO (ex-iLead)/dWork/dLink/dAccount, --- , Toolbox, Library
+const SIDEBAR_NAV = [
+  { id: "dgo",       label: "dGO",       icon: "school",        group: "primary" },
+  { id: "dwork",     label: "dWork",     icon: "rocket_launch", group: "primary" },
+  { id: "dlink",     label: "dLink",     icon: "hub",           group: "primary" },
+  { id: "daccount",  label: "dAccount",  icon: "trending_up",   group: "primary" },
+  { id: "toolbox",   label: "Toolbox",   icon: "build",         group: "utility" },
+  { id: "library",   label: "Library",   icon: "menu_book",     group: "utility" },
+];
+
+const NAV_META = {
+  dashboard: { title: "Dashboard", sub: "Tổng quan hằng ngày" },
+  dgo:       { title: "dGO",       sub: "Học gì để giỏi hơn?" },
+  "dgo/job": { title: "dGO",       sub: "Job Track · Career Track · Functional Domain" },
+  "dgo/icm": { title: "dGO",       sub: "Competence Track · Forming → Living → Holding" },
+  dwork:     { title: "dWork",     sub: "Hôm nay làm gì?" },
+  "dwork/fc": { title: "dWork",    sub: "FC Catalog · FC → OM → OD" },
+  dlink:     { title: "dLink",     sub: "Cần ai để làm tốt hơn?" },
+  daccount:  { title: "dAccount",  sub: "Đang ở đâu, tạo ra gì?" },
+  toolbox:   { title: "Toolbox",   sub: "Công cụ hỗ trợ" },
+  library:   { title: "Library",   sub: "Tài liệu tham khảo" },
+};
+
+const USER = { name: "Hoàng Anh", shortName: "Hoàng Anh", initials: "NA", role: "BMI-3 · Trusted Advisor" };
+
+const ANNOUNCEMENTS = [
+  { id: 1, level: "info", title: "Chào mừng đến với ESB", body: "Hệ thống đang trong giai đoạn dựng khung giao diện.", at: "Vừa xong" },
+  { id: 2, level: "warn", title: "Nội dung đang phát triển", body: "Các màn hình sẽ được cập nhật theo tài liệu yêu cầu tương ứng.", at: "Hôm nay" },
+];
+
+// =============== Level-3 sub-tabs per module (ContextBar) ===============
+// dGO có 2 tab: Job Track và ICM. Các module khác chưa có sub-tab (thêm sau khi có tài liệu).
+const NAV_TREE = {
+  dgo: [
+    { id: "dgo/job", label: "Job Track", icon: "badge" },
+    { id: "dgo/icm", label: "Competence Track", icon: "trending_up" },
+  ],
+  dwork: [
+    { id: "dwork/fc", label: "FC Catalog", icon: "account_tree" },
+  ],
+};
+
+// =============== Sidebar ===============
+function Sidebar({ activeItem, onNavigate, compact, setCompact }) {
+  const primary = SIDEBAR_NAV.filter(i => i.group === "primary");
+  const utility = SIDEBAR_NAV.filter(i => i.group === "utility");
+
+  const renderItem = (item) => {
+    const active = item.id === activeItem;
+    return (
+      <a key={item.id} href="#" onClick={(e) => { e.preventDefault(); onNavigate(item.id); }}
+        title={compact ? item.label : ""}
+        className={`flex items-center gap-3 rounded-lg transition-all group relative
+          ${compact ? "h-10 justify-center" : "py-2.5 px-3"}
+          ${active ? "bg-[#EBF6F3] text-[#3A9487] font-bold" : "text-[#737373] hover:bg-[#EBF6F3] hover:text-[#3A9487]"}`}>
+        {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#3A9487]"></span>}
+        <span className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center">
+          <Icon name={item.icon} size={18} filled={active} weight={active ? 500 : 400} />
+        </span>
+        {!compact && <span className={`text-[14px] ${active ? "font-bold" : "font-medium"}`}>{item.label}</span>}
+      </a>
+    );
+  };
+
+  return (
+    <aside className={`warm-sidebar flex flex-col h-[calc(100vh-1.5rem)] sticky top-3 z-30 transition-[width] duration-200 overflow-hidden ${compact ? "w-[76px]" : "w-[248px]"}`}>
+      {/* Brand */}
+      <div className={`flex items-center gap-3 px-4 pt-5 pb-5 ${compact ? "justify-center px-2" : ""}`}>
+        <div className="w-8 h-8 bg-[#3A9487] rounded-lg flex items-center justify-center text-white font-display font-bold text-[16px] flex-shrink-0 leading-none select-none">E</div>
+        {!compact && (
+          <div className="min-w-0">
+            <p className="font-display font-bold text-[16px] text-[#161616] leading-none">ESB</p>
+            <p className="text-[12px] text-[#A3A3A3] mt-0.5 truncate leading-none">Employee Service Blueprint</p>
+          </div>
+        )}
+      </div>
+
+      {/* Dashboard shortcut */}
+      {!compact && (
+        <div className="px-3 mb-3">
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate("dashboard"); }}
+            className={`relative flex items-center gap-2 w-full h-12 px-3 rounded-lg text-[14px] font-medium transition-all
+              ${activeItem === "dashboard" ? "bg-[#EBF6F3] text-[#3A9487] font-bold" : "text-[#737373] hover:bg-[#EBF6F3] hover:text-[#3A9487]"}`}>
+            {activeItem === "dashboard" && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#3A9487]"></span>}
+            <Icon name="dashboard" size={16} filled={activeItem === "dashboard"} />
+            <span>Dashboard</span>
+          </a>
+        </div>
+      )}
+      {compact && (
+        <div className="px-2 mb-2">
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate("dashboard"); }}
+            title="Dashboard"
+            className={`flex items-center justify-center w-full h-12 rounded-lg transition-all
+              ${activeItem === "dashboard" ? "bg-[#EBF6F3] text-[#3A9487]" : "text-[#737373] hover:bg-[#EBF6F3] hover:text-[#3A9487]"}`}>
+            <Icon name="dashboard" size={18} filled={activeItem === "dashboard"} />
+          </a>
+        </div>
+      )}
+
+      {/* 4 La Bàn label */}
+      {!compact && (
+        <p className="px-4 text-[10px] uppercase tracking-[0.14em] font-bold text-[#A3A3A3] mb-1.5">4 La Bàn</p>
+      )}
+
+      <nav className={`flex-1 ${compact ? "px-2" : "px-3"} space-y-0.5 overflow-y-auto scrollbar-hide`}>
+        <div className="space-y-0.5">
+          {primary.map(renderItem)}
+        </div>
+        <div className={`${compact ? "mx-2" : "mx-1"} my-3 h-px bg-[#EBEBEB]`}></div>
+        <div className="space-y-0.5">
+          {utility.map(renderItem)}
+        </div>
+      </nav>
+
+      {/* User card */}
+      {!compact && (
+        <div className="mx-3 mb-3 p-3 rounded-lg bg-[#F5F5F5] ring-1 ring-[#DADADA]">
+          <div className="flex items-center gap-2.5">
+            <Avatar initials={USER.initials} size={32} tone="dashboard-user" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] font-semibold text-[#161616] truncate">{USER.shortName}</p>
+              <p className="text-[10px] text-[#A3A3A3] truncate">{USER.role}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className={`border-t border-[#EBEBEB] ${compact ? "px-2 py-3" : "px-3 py-2.5"} space-y-0.5`}>
+        <button onClick={() => setCompact(!compact)} title={compact ? "Mở rộng" : "Thu gọn"}
+          className={`flex items-center gap-3 rounded-lg transition-all text-[#737373] hover:bg-[#F5F5F5] hover:text-[#3A9487]
+            ${compact ? "w-full h-11 justify-center" : "h-11 px-3 w-full flex items-center"}`}>
+          <Icon name={compact ? "right_panel_open" : "right_panel_close"} size={18} />
+          {!compact && <span className="text-[14px]">Thu gọn</span>}
+        </button>
+        <a href="#" className={`flex items-center gap-3 rounded-lg transition-all text-[#737373] hover:bg-[#F5F5F5]
+          ${compact ? "w-full h-11 justify-center" : "h-11 px-3 flex items-center"}`}>
+          <Icon name="logout" size={18} />
+          {!compact && <span className="text-[14px]">Đăng xuất</span>}
+        </a>
+      </div>
+    </aside>
+  );
+}
+
+// =============== Top bar (y nguyên header từ file gốc DSB) ===============
+// =============== Đóng vai — role simulation (IC / FCM / FD Head) ===============
+const ROLE_USERS = {
+  IC:     { name: "Nguyễn Thị Thắm", roleLabel: "IC · Nguyễn Thị Thắm",     initials: "NT", tone: "blue" },
+  FCM:    { name: "Phạm Thanh Hùng", roleLabel: "FCM · Phạm Thanh Hùng",    initials: "PH", tone: "teal" },
+  FDHead: { name: "Đặng Anh Tuấn",   roleLabel: "FD Head · Đặng Anh Tuấn",  initials: "ĐT", tone: "dashboard-user" },
+  EXCO:   { name: "Lê Minh Quân",    roleLabel: "EXCO · Lê Minh Quân",      initials: "LQ", tone: "purple" },
+};
+
+function RoleSwitcher({ role, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
+
+  const roleOptions = [
+    { id: "IC", label: "IC", sub: ROLE_USERS.IC.name },
+    { id: "FCM", label: "FCM", sub: ROLE_USERS.FCM.name },
+    { id: "FDHead", label: "FD Head", sub: ROLE_USERS.FDHead.name },
+    { id: "EXCO", label: "EXCO", sub: ROLE_USERS.EXCO.name },
+  ];
+  const current = roleOptions.find(r => r.id === role);
+
+  return (
+    <div className="hidden md:flex items-center gap-2 shrink-0 relative" ref={ref}>
+      <span className="text-[11.5px] font-bold text-[#737373] whitespace-nowrap">Đóng vai:</span>
+      <button onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 pl-3 pr-2 h-8 rounded-lg text-[12.5px] font-semibold transition-all bg-[#EBF6F3] text-[#3A9487] ring-1 ring-[#3A9487]/30 hover:bg-[#DCEFEA] min-w-[190px] justify-between">
+        <span className="truncate">{current.label}: {current.sub}</span>
+        <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-[#3A9487]/60 shrink-0" />
+      </button>
+
+      {open && (
+        <div className="absolute z-40 top-full right-0 mt-2 w-[220px] bg-white rounded-xl shadow-lift ring-1 ring-[#DADADA] py-1 animate-fade-in">
+          {roleOptions.map(r => {
+            const isSel = r.id === role;
+            return (
+              <button key={r.id} onClick={() => { onChange(r.id); setOpen(false); }}
+                className={`w-full flex items-center justify-between gap-2.5 px-4 py-2.5 text-[13px] text-left transition-colors
+                  ${isSel ? "bg-[#EBF6F3] text-[#3A9487] font-semibold" : "text-[#2A2A2A] hover:bg-[#F5F5F5]"}`}>
+                <span>{r.label}: {r.sub}</span>
+                {isSel && <Icon name="check" size={15} className="text-[#3A9487] shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TopBar({ compact, setCompact, route, subroute, role, onRoleChange }) {
+  const [notifOpen, setNotifOpen] = useState(false);
+  useEffect(() => {
+    const h = (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        document.getElementById("global-search")?.focus();
+      }
+    };
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, []);
+
+  return (
+    <div className="shrink-0 border-b border-[#EBEBEB]">
+      <div className="flex items-center gap-3 w-full px-4 h-12">
+        {/* Mobile menu */}
+        <button className="md:hidden w-8 h-8 rounded-lg hover:bg-[#F5F5F5] text-[#737373] flex items-center justify-center shrink-0"
+          onClick={() => setCompact(!compact)}>
+          <Icon name="menu" size={18} />
+        </button>
+
+        {/* Global search */}
+        <label className="flex items-center gap-2 h-8 flex-1 max-w-[400px] rounded-lg bg-[#F5F5F5] ring-1 ring-[#DADADA] focus-within:ring-1 focus-within:ring-[#3A9487] focus-within:bg-white px-3 transition-all cursor-text">
+          <Icon name="search" size={16} className="text-[#3A9487] shrink-0" />
+          <input id="global-search" type="text"
+            placeholder="Tìm kiếm… (⌘K)"
+            className="no-focus-box flex-1 min-w-0 bg-transparent text-[14px] text-[#161616] border-0 outline-none p-0 placeholder:text-[#A3A3A3] leading-none" />
+        </label>
+
+        <div className="flex-1" />
+
+        {/* Đóng vai — role simulation */}
+        <RoleSwitcher role={role} onChange={onRoleChange} />
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Notifications */}
+          <div className="relative">
+            <button onClick={() => setNotifOpen(o => !o)}
+              className={`relative text-[#737373] hover:text-[#161616] transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F5F5F5]`}>
+              <Icon name="notifications" size={20} filled={notifOpen} />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+            </button>
+            {notifOpen && (
+              <div className="absolute right-0 top-10 w-[340px] bg-white rounded-lg shadow-lift ring-1 ring-[#DADADA] overflow-hidden animate-fade-in z-30">
+                <div className="px-4 py-3 border-b border-[#EBEBEB] flex items-center justify-between">
+                  <p className="font-display font-semibold text-[14px] text-[#161616]">Thông báo</p>
+                  <button className="text-[12px] font-medium text-[#737373] hover:text-[#161616] hover:underline">Đọc hết</button>
+                </div>
+                <ul className="max-h-[380px] overflow-y-auto scrollbar-thin divide-y divide-[#EBEBEB]/60">
+                  {ANNOUNCEMENTS.map(a => (
+                    <li key={a.id} className="px-4 py-3 hover:bg-[#F5F5F5] flex gap-3 cursor-pointer">
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                        ${a.level === "warn" ? "bg-[#EBF6F3] text-[#3A9487]" : "bg-[#C4E5DF] text-[#161616]"}`}>
+                        <Icon name={a.level === "warn" ? "warning" : "campaign"} size={15} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-semibold text-[#161616]">{a.title}</p>
+                        <p className="text-[12px] text-[#737373] mt-0.5">{a.body}</p>
+                        <p className="text-[10px] text-[#A3A3A3] mt-1 font-mono">{a.at}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Avatar — đổi theo vai đang đóng */}
+          <button className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center ring-2 ring-[#DADADA] hover:ring-[#DADADA] transition-all" title={ROLE_USERS[role].roleLabel}>
+            <Avatar initials={ROLE_USERS[role].initials} size={32} tone={ROLE_USERS[role].tone} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============== Context bar — module sub-tabs, underline style (y hệt file gốc) ===============
+function ContextBar({ modules, subroute, onNavigate }) {
+  if (!modules || modules.length === 0) return null;
+  return (
+    <div className="border-b border-[#EBEBEB] bg-white shrink-0">
+      <nav className="flex items-center overflow-x-auto scrollbar-hide px-4">
+        {modules.map((m) => {
+          const isActive = m.id === subroute;
+          return (
+            <a key={m.id} href="#"
+              onClick={(e) => { e.preventDefault(); onNavigate(m.id); }}
+              className={`relative inline-flex items-center gap-2 px-4 h-11 text-[14px] font-medium whitespace-nowrap transition-colors border-b-2
+                ${isActive
+                  ? "text-[#3A9487] font-semibold border-[#3A9487]"
+                  : "text-[#737373] border-transparent hover:text-[#3A9487] hover:border-[#C4E5DF]"}`}>
+              <Icon name={m.icon} size={15} filled={isActive} />
+              <span>{m.label}</span>
+            </a>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
+// =============== ICM — SC & DC theo Job Track ===============
+const JOB_TRACKS = [
+  { id: "fs1", label: "FS 1 · PM", sub: "Product Management" },
+  { id: "fs2", label: "FS 2 · CE", sub: "Client Engineering" },
+];
+
+const TYPE_STYLES = {
+  Functional: { tag: "bg-[#EAF2FF] text-[#1B2A4A]", dot: "#1B2A4A" },
+  Leadership: { tag: "bg-[#F3E9F6] text-[#7A4F8F]", dot: "#7A4F8F" },
+  Digital:    { tag: "bg-[#EBF6F3] text-[#3A9487]", dot: "#3A9487" },
+  Behavior:   { tag: "bg-[#F5DDD0] text-[#7C4A1E]", dot: "#7C4A1E" },
+};
+
+const ICM_SEED = {
+  fs1: {
+    fix: [
+      { name: "Product Discovery", sub: "Jobs-to-be-done · Design Sprint", type: "Functional", cert: "Pragmatic PM Cert", ev: "Đã tổ chức 3 buổi Design Sprint cho đội nhóm Vùng Vàng.", self: 4, sm: 4, rated: true },
+      { name: "Customer Research", sub: "Interview · Survey", type: "Functional", cert: "UX Specialist Cert", ev: "Phỏng vấn sâu 12 khách hàng trực tiếp để xây dựng persona.", self: 4, sm: 3, rated: true },
+      { name: "Data Analysis", sub: "Product analytics", type: "Functional", cert: "Google Data Analytics", ev: "Thiết lập phễu chuyển đổi giúp phát hiện điểm nghẽn tại bước thanh toán.", self: 3, sm: 4, rated: true },
+      { name: "Business Acumen", sub: "Unit economics · P&L", type: "Functional", cert: "MBA Foundation", ev: "Xây dựng mô hình doanh thu và P&L giả định cho tính năng mới.", self: 3, sm: 4, rated: true },
+      { name: "Strategic Thinking", sub: "OKR · North Star", type: "Functional", cert: "OKR Master Certificate", ev: "Đề xuất chỉ số North Star Metric mới cho toàn chuỗi BEP.", self: 4, sm: 5, rated: true },
+      { name: "Communication", sub: "PRD · Stakeholder", type: "Functional", cert: "Professional Communication", ev: "Viết tài liệu PRD hoàn chỉnh, rõ ràng, được 100% dev thống nhất.", self: 4, sm: 4, rated: true },
+      { name: "People Management", sub: "Mentoring · Coaching · Feedback", type: "Leadership", cert: "Agile Leader Cert", ev: "Hỗ trợ và định hướng phát triển nghề nghiệp thành công cho 2 bạn junior.", self: 3, sm: 4, rated: true },
+      { name: "Stakeholder Alignment", sub: "Negotiation · Strategy Collaboration", type: "Leadership", cert: "Scrum Product Owner", ev: "Đàm phán và giải quyết thành công chồng chéo tài nguyên giữa Dev và BA.", self: 4, sm: 4, rated: true },
+      { name: "Risk Management", sub: "Rủi ro sản phẩm · Kế hoạch dự phòng", type: "Functional", cert: "PMP Foundation", ev: "Lập ma trận rủi ro cho dự án ra mắt cổng thanh toán IPP.", self: 3, sm: 3, rated: true },
+      { name: "Financial Modeling", sub: "Forecast · Budget", type: "Functional", cert: "Corporate Finance Cert", ev: "Xây dựng mô hình dự phóng doanh thu 3 năm cho line sản phẩm mới.", self: 3, sm: 4, rated: true },
+      { name: "Market Research", sub: "Competitive analysis · TAM/SAM/SOM", type: "Functional", cert: "Market Research Society Cert", ev: "Phân tích 5 đối thủ cạnh tranh chính và đề xuất định vị sản phẩm.", self: 4, sm: 4, rated: true },
+      { name: "Roadmap Planning", sub: "Prioritization framework · RICE", type: "Functional", cert: "Product Roadmap Cert", ev: "Xây dựng roadmap quý theo khung RICE, thống nhất với 3 team liên quan.", self: 4, sm: 5, rated: true },
+      { name: "Conflict Resolution", sub: "Hoà giải · Đàm phán nội bộ", type: "Leadership", cert: "Mediation Skills Cert", ev: "Giải quyết bất đồng giữa 2 trưởng nhóm về ưu tiên tính năng.", self: 3, sm: 4, rated: true },
+      { name: "Team Development", sub: "Coaching · Career pathing", type: "Leadership", cert: "ICF Coaching Cert", ev: "Xây dựng lộ trình phát triển cá nhân cho 4 thành viên trong team.", self: 4, sm: 4, rated: true },
+      { name: "Change Management", sub: "Quản trị thay đổi · Adoption", type: "Leadership", cert: "Prosci Change Practitioner", ev: "Dẫn dắt team chuyển đổi quy trình Agile mới, đạt 90% adoption sau 1 tháng.", self: 3, sm: 3, rated: true },
+    ],
+    addon: [
+      { name: "AI Prompting", sub: "LLM workflow · Custom GPTs", type: "Digital", cert: "Google AI Essentials", ev: "Dựng prompt template hỗ trợ BA tự sinh tài liệu user story.", self: 4, sm: 4, rated: true },
+      { name: "No-code Prototyping", sub: "Figma · Webflow rapid build", type: "Digital", cert: "Figma Professional", ev: "Thiết kế mockups và clickable prototype tốc độ cao cho dLink.", self: 4, sm: 5, rated: true },
+      { name: "Adaptability", sub: "Học cái mới nhanh · Linh hoạt", type: "Behavior", cert: "Agile Mindset Cert", ev: "Nắm vững và chuyển giao công nghệ mới cho team chỉ trong 1 tuần.", self: 4, sm: 4, rated: true },
+      { name: "Problem Solving", sub: "Tư duy giải quyết vấn đề phức tạp", type: "Behavior", cert: "Lean Six Sigma Belt", ev: "Phân tích nguyên nhân gốc rễ sự cố thất thoát dữ liệu Vùng Vàng.", self: 4, sm: 4, rated: true },
+    ],
+    dc: [
+      { name: "Product Discovery, Prioritization & PRD", ev: "Dựng luồng nghiệp vụ chi tiết và hoàn thiện PRD cho cổng thanh toán IPP.", self: 4, rated: true },
+      { name: "Feature Launch & Post-launch Iteration", ev: "Tổ chức triển khai và tối ưu các chỉ số chuyển đổi sau ra mắt cổng IPP.", self: 4, rated: true },
+      { name: "Cross-team Dependency & Status Mgmt", ev: "Quản lý phụ thuộc chặt chẽ và phối hợp nhịp nhàng giữa team Core và Front.", self: 4, rated: true },
+    ],
+  },
+  fs2: { fix: [], addon: [], dc: [] },
+};
+
+function cloneICM(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+const SC_TYPE_TAG = { Functional: "navy", Leadership: "purple", Digital: "teal", Behavior: "gold" };
+
+function ICMTableShell({ title, sub, headers, children, footer }) {
+  return (
+    <div className="rounded-xl ring-1 ring-[#DADADA] shadow-soft overflow-hidden mb-5">
+      <div className="flex items-center gap-2 px-4 py-3 bg-[#F5F5F5] border-b border-[#EBEBEB]">
+        <div>
+          <p className="font-display font-bold text-[14px] text-[#161616]">{title}</p>
+          <p className="text-[11px] font-semibold text-[#A3A3A3] mt-0.5">{sub}</p>
+        </div>
+      </div>
+      <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full border-collapse table-fixed">
+          <thead className="bg-[#F5F5F5] border-b border-[#EBEBEB]">
+            <tr>
+              {headers.map((h, i) => (
+                <th key={i} className={`px-4 py-2.5 text-[12px] font-bold uppercase tracking-wider text-[#474747] whitespace-nowrap ${h.align === "center" ? "text-center" : "text-left"}`} style={{ width: h.width }}>
+                  {h.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
+      {footer}
+    </div>
+  );
+}
+
+function SCTable({ title, sub, rows, group, editMode, onField, showAddRow, onAdd, collapsible = false, maxRows = 10, removable = false, onRemove }) {
+  const [expanded, setExpanded] = useState(false);
+  const isCollapsed = collapsible && !editMode && rows.length > maxRows && !expanded;
+  const visibleRows = isCollapsed ? rows.slice(0, maxRows) : rows;
+  const hiddenCount = rows.length - maxRows;
+
+  return (
+    <ICMTableShell
+      title={title} sub={sub}
+      headers={[
+        { label: "Tên SC", width: removable ? "30%" : "34%" },
+        { label: "Loại", width: "16%" },
+        { label: "Chứng chỉ", width: removable ? "44%" : "50%" },
+        ...(removable ? [{ label: "", width: "44px", align: "center" }] : []),
+      ]}
+      footer={<>
+        {collapsible && !editMode && rows.length > maxRows && (
+          <button onClick={() => setExpanded(e => !e)}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[13px] font-semibold text-[#737373] border-t border-[#EBEBEB] bg-[#FAFAFA] hover:bg-[#F5F5F5] hover:text-[#161616] transition-colors">
+            <Icon name={expanded ? "expand_less" : "expand_more"} size={15} />
+            {expanded ? "Rút gọn" : `Xem thêm ${hiddenCount} mục`}
+          </button>
+        )}
+        {showAddRow && (
+          <button onClick={onAdd}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[13px] font-semibold text-[#3A9487] border-t border-dashed border-[#DADADA] bg-[#FAFAFA] hover:bg-[#EBF6F3] transition-colors">
+            <Icon name="add" size={15} /> Thêm Add-on SC
+          </button>
+        )}
+      </>}
+    >
+      {rows.length === 0 && (
+        <tr><td colSpan={removable ? 4 : 3} className="px-4 py-10 text-center text-[#A3A3A3] text-[14px]">Chưa có dữ liệu cho Job Track này.</td></tr>
+      )}
+      {visibleRows.map((r, idx) => (
+        <tr key={idx} className={`border-b border-[#EBEBEB] last:border-b-0 transition-colors hover:bg-[#F5F5F5] ${idx % 2 ? "bg-[#F5F5F5]/30" : "bg-white"}`}>
+          <td className="px-4 py-2.5 align-top text-[14px]">
+            <p className="font-semibold text-[#161616]">{r.name}</p>
+            {r.sub && <p className="text-[12px] text-[#A3A3A3] mt-0.5">{r.sub}</p>}
+          </td>
+          <td className="px-4 py-2.5 align-top">
+            <Tag tone={SC_TYPE_TAG[r.type] || "neutral"} size="xs">{r.type}</Tag>
+          </td>
+          {editMode ? (
+            <td className="px-4 py-2.5 align-top">
+              <TextField value={r.cert || ""} onChange={(e) => onField(group, idx, "cert", e.target.value)} placeholder="Chứng chỉ…" />
+            </td>
+          ) : (
+            <td className="px-4 py-2.5 align-top text-[#737373] text-[12.5px]">{r.cert || "—"}</td>
+
+          )}
+          {removable && (
+            <td className="px-4 py-2.5 align-top text-center">
+              <button onClick={() => onRemove(idx)} title="Xoá Add-on SC này"
+                className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-[#A3A3A3] hover:text-red-600 hover:bg-red-50 transition-colors">
+                <Icon name="delete" size={17} />
+              </button>
+            </td>
+          )}
+        </tr>
+      ))}
+    </ICMTableShell>
+  );
+}
+
+function DCTable({ rows, editMode, onField }) {
+  return (
+    <ICMTableShell
+      title="DC · Delivery Competence" sub="Sinh tự động từ FC/OC"
+      headers={[
+        { label: "Tên DC", width: "30%" },
+        { label: "Minh chứng kết quả", width: "70%" },
+      ]}
+    >
+      {rows.length === 0 && (
+        <tr><td colSpan={2} className="px-4 py-10 text-center text-[#A3A3A3] text-[14px]">Chưa có DC nào được sinh cho Job Track này.</td></tr>
+      )}
+      {rows.map((r, idx) => (
+        <tr key={idx} className={`border-b border-[#EBEBEB] last:border-b-0 transition-colors hover:bg-[#F5F5F5] ${idx % 2 ? "bg-[#F5F5F5]/30" : "bg-white"}`}>
+          <td className="px-4 py-2.5 align-top font-semibold text-[#161616] text-[14px]">{r.name}</td>
+          {editMode ? (
+            <td className="px-4 py-2.5 align-top">
+              <TextAreaField value={r.ev || ""} onChange={(e) => onField("dc", idx, "ev", e.target.value)} placeholder="Minh chứng kết quả…" rows={2} />
+            </td>
+          ) : (
+            <td className="px-4 py-2.5 align-top text-[#737373] text-[12.5px]">{r.ev || "—"}</td>
+          )}
+        </tr>
+      ))}
+    </ICMTableShell>
+  );
+}
+
+// Confirm modal dùng chung cho các hành động xoá — đúng style Modal hệ thống, không dùng window.confirm
+function ConfirmModal({ open, title = "Xác nhận xóa?", desc, onClose, onConfirm }) {
+  return (
+    <Modal open={open} onClose={onClose} title={title} sub={desc} size="sm"
+      footer={<>
+        <Button tone="ghost" onClick={onClose}>Hủy</Button>
+        <Button tone="primary" onClick={onConfirm} className="!bg-red-600 hover:!bg-red-700">Xác nhận</Button>
+      </>}>
+    </Modal>
+  );
+}
+
+function AddSCModal({ open, onClose, onSave }) {
+  const [form, setForm] = useState({ name: "", sub: "", type: "Functional", cert: "" });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const submit = () => {
+    if (!form.name.trim()) return;
+    onSave({ ...form });
+    setForm({ name: "", sub: "", type: "Functional", cert: "" });
+  };
+  return (
+    <Modal open={open} onClose={onClose} title="Thêm mới SC" sub="Bổ sung kỹ năng tự khai vào ICM bất cứ lúc nào."
+      footer={<>
+        <Button tone="ghost" onClick={onClose}>Hủy</Button>
+        <Button tone="primary" onClick={submit}>Lưu SC</Button>
+      </>}>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Tên SC <span className="text-red-500">*</span></label>
+          <TextField value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="VD: Data Storytelling, People Management…" dense={false} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Mô tả ngắn</label>
+          <TextField value={form.sub} onChange={(e) => set("sub", e.target.value)} placeholder="VD: Trực quan hóa · kể chuyện bằng số liệu" dense={false} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Loại <span className="text-red-500">*</span></label>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.keys(SC_TYPE_TAG).map(t => (
+              <button key={t} type="button" onClick={() => set("type", t)}
+                className={`text-[13px] font-semibold rounded-lg px-3 py-2 ring-1 transition-colors
+                  ${form.type === t ? "bg-[#EBF6F3] ring-[#3A9487] text-[#3A9487]" : "bg-white ring-[#DADADA] text-[#737373] hover:ring-[#3A9487]"}`}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Minh chứng - chứng chỉ</label>
+          <TextField value={form.cert} onChange={(e) => set("cert", e.target.value)} placeholder="VD: Google AI Essentials, PMI, Agile Cert…" dense={false} />
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// Job Track switch — đúng style NavDropdown của DSB (pill bg-[#EBF6F3] ring teal khi active), bỏ icon
+function JobTrackSwitch({ value, onChange, tracks }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      {tracks.map(t => {
+        const active = t.id === value;
+        return (
+          <button key={t.id} onClick={() => onChange(t.id)}
+            className={`flex items-center gap-2 px-4 h-8 rounded-lg text-[14px] font-semibold transition-all
+              ${active ? "bg-[#EBF6F3] text-[#3A9487] ring-1 ring-[#3A9487]/30" : "text-[#737373] hover:bg-[#F5F5F5] hover:text-[#3A9487]"}`}>
+            <span>{t.label} · {t.sub}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ICMScreen({ role = "IC" }) {
+  const [jobTrack, setJobTrack] = useState("fs1");
+  const [data, setData] = useState(() => cloneICM(ICM_SEED));
+  const [editMode, setEditMode] = useState(false);
+  const [draft, setDraft] = useState(null);
+  const [addOpen, setAddOpen] = useState(false);
+
+  const current = data[jobTrack];
+
+  const updateField = (group, idx, field, value) => {
+    setData(d => { const next = cloneICM(d); next[jobTrack][group][idx][field] = value; return next; });
+  };
+
+  const startEdit = () => { setDraft(cloneICM(data)); setEditMode(true); };
+  const cancelEdit = () => { if (draft) setData(draft); setEditMode(false); setDraft(null); };
+  const saveEdit = () => { setEditMode(false); setDraft(null); };
+  const addAddon = (item) => {
+    setData(d => { const next = cloneICM(d); next[jobTrack].addon.push(item); return next; });
+    setAddOpen(false);
+  };
+  const [removeIdx, setRemoveIdx] = useState(null);
+  const removeAddon = (idx) => setRemoveIdx(idx);
+  const confirmRemoveAddon = () => {
+    setData(d => { const next = cloneICM(d); next[jobTrack].addon.splice(removeIdx, 1); return next; });
+    setRemoveIdx(null);
+  };
+
+  return (
+    <div className="p-6 space-y-5 max-w-[1200px] animate-fade-in">
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <p className="font-display font-bold text-[20px] text-[#161616]">Competence Track — SC & DC theo Job Track</p>
+          <p className="text-[13px] text-[#737373] mt-1 max-w-[560px]">Mỗi Job Track gắn một Function Specialty. Một người có thể giữ nhiều Job Track — mỗi FS có một bộ ICM riêng.</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <JobTrackSwitch value={jobTrack} onChange={setJobTrack} tracks={JOB_TRACKS} />
+        <div className="flex items-center gap-2">
+          {editMode ? (
+            <>
+              <Button tone="ghost" size="sm" onClick={cancelEdit}>Hủy</Button>
+              <Button tone="primary" size="sm" onClick={saveEdit}>Lưu</Button>
+            </>
+          ) : (
+            <Button tone="primary" size="sm" onClick={startEdit}>Chỉnh sửa</Button>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <SCTable title="Fix SC" sub="Functional & Leadership" rows={current.fix} group="fix"
+          editMode={editMode} onField={updateField} showAddRow={false} collapsible maxRows={10} />
+
+        <SCTable title="Add-on SC" sub="Digital / Behavior · IC tự khai" rows={current.addon} group="addon"
+          editMode={editMode} onField={updateField} showAddRow={!editMode} onAdd={() => setAddOpen(true)}
+          removable={!editMode} onRemove={removeAddon} />
+
+        <DCTable rows={current.dc} editMode={editMode} onField={updateField} />
+      </div>
+
+      <AddSCModal open={addOpen} onClose={() => setAddOpen(false)} onSave={addAddon} />
+      <ConfirmModal open={removeIdx !== null}
+        title="Xác nhận xóa?"
+        desc="Bạn có chắc chắn xóa Add-on SC này không?"
+        onClose={() => setRemoveIdx(null)}
+        onConfirm={confirmRemoveAddon} />
+    </div>
+  );
+}
+
+// =============== Placeholder content (per tab) ===============
+// =============== FC Catalog — FC → OM → OD (theo iDSB-dWork triển khai) ===============
+const TODAY = "27-07-2026";
+let __fcIdSeq = 100;
+const genId = (prefix) => `${prefix}-${(++__fcIdSeq)}`;
+
+const STATUS_TONE = {
+  Draft: "neutral", Reviewing: "gold", Reviewed: "navy", Checking_resource: "gold",
+  Assigned: "teal", Active: "teal", Inprogress: "green", Paused: "gold",
+  Closing: "gold", Closed: "navy", Inactive: "red",
+};
+function StatusPill({ status, size = "sm" }) {
+  return <Tag tone={STATUS_TONE[status] || "neutral"} size={size}>{status}</Tag>;
+}
+
+function cloneTree(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+function logEntry(action, role, note = "") {
+  return { id: genId("LOG"), action, actor: ROLE_USERS[role].name, actorRole: role, at: TODAY, note };
+}
+
+// ---- Seed data ----
+const FC_SEED = [
+  {
+    id: "FC-001", code: "FC-CSKH-01", name: "Vùng Vàng — Chăm sóc khách hàng",
+    desc: "Chuẩn hóa trải nghiệm chăm sóc khách hàng tại khu vực Vùng Vàng.",
+    layer: "Core", sbu: "Retail", createdAt: "10-06-2026", createdBy: "Phạm Thanh Hùng",
+    approvedAt: "12-06-2026", approvedBy: "Lê Minh Quân", status: "Active",
+    daci: { driver: "Phạm Thanh Hùng", approver: "Lê Minh Quân", contributor: "", informed: "" },
+    auditLog: [
+      { id: "L1", action: "Tạo FC", actor: "Phạm Thanh Hùng", actorRole: "FCM", at: "10-06-2026", note: "" },
+      { id: "L2", action: "Duyệt FC", actor: "Lê Minh Quân", actorRole: "EXCO", at: "12-06-2026", note: "" },
+    ],
+    oms: [
+      {
+        id: "OM-001", code: "OM-CSKH-01", name: "Vận hành tổng đài", fcId: "FC-001",
+        desc: "Quản lý vận hành tổng đài chăm sóc khách hàng.",
+        createdAt: "13-06-2026", createdBy: "Phạm Thanh Hùng", accountable: "Đặng Anh Tuấn",
+        checkers: { resource: { assignee: "Đặng Anh Tuấn", checked: true }, expertise: { assignee: "Đặng Anh Tuấn", checked: true } },
+        status: "Active",
+        auditLog: [{ id: "L3", action: "Tạo & Kích hoạt OM", actor: "Phạm Thanh Hùng", actorRole: "FCM", at: "13-06-2026", note: "" }],
+        ods: [
+          {
+            id: "OD-001", code: "OD-CSKH-01-01", name: "Xử lý khiếu nại khách hàng", omId: "OM-001",
+            desc: "Tiếp nhận và xử lý khiếu nại phát sinh từ khách hàng.",
+            createdAt: "14-06-2026", createdBy: "Nguyễn Thị Thắm", approvedAt: "15-06-2026", approvedBy: "Đặng Anh Tuấn",
+            raci: { R: "Nguyễn Thị Thắm", A: "Đặng Anh Tuấn", C: "", I: "" },
+            kpis: [{ id: "KPI-1", code: "KPI-CSKH-01", name: "Tỷ lệ xử lý trong 24h", target: 95, current: 88, unit: "%", period: "weekly" }],
+            inputRef: "", frequency: "weekly", status: "Inprogress",
+            auditLog: [
+              { id: "L4", action: "Tạo OD", actor: "Nguyễn Thị Thắm", actorRole: "IC", at: "14-06-2026", note: "" },
+              { id: "L5", action: "Gán Assigned", actor: "Đặng Anh Tuấn", actorRole: "FDHead", at: "15-06-2026", note: "" },
+              { id: "L6", action: "Kích hoạt vận hành", actor: "Nguyễn Thị Thắm", actorRole: "IC", at: "16-06-2026", note: "" },
+            ],
+          },
+          {
+            id: "OD-002", code: "OD-CSKH-01-02", name: "Khảo sát hài lòng sau cuộc gọi", omId: "OM-001",
+            desc: "Gửi khảo sát CSAT ngay sau mỗi cuộc gọi hỗ trợ.",
+            createdAt: "16-06-2026", createdBy: "Nguyễn Thị Thắm", approvedAt: "", approvedBy: "",
+            raci: { R: "Nguyễn Thị Thắm", A: "Đặng Anh Tuấn", C: "", I: "" },
+            kpis: [], inputRef: "", frequency: "daily", status: "Reviewing",
+            auditLog: [{ id: "L7", action: "Tạo OD & trình duyệt", actor: "Nguyễn Thị Thắm", actorRole: "IC", at: "16-06-2026", note: "" }],
+          },
+        ],
+      },
+      {
+        id: "OM-002", code: "OM-CSKH-02", name: "Đào tạo & chất lượng", fcId: "FC-001",
+        desc: "Đảm bảo chất lượng dịch vụ thông qua đào tạo liên tục.",
+        createdAt: "18-06-2026", createdBy: "Phạm Thanh Hùng", accountable: "",
+        checkers: { resource: { assignee: "", checked: false }, expertise: { assignee: "", checked: false } },
+        status: "Draft",
+        auditLog: [{ id: "L8", action: "Tạo OM", actor: "Phạm Thanh Hùng", actorRole: "FCM", at: "18-06-2026", note: "" }],
+        ods: [],
+      },
+    ],
+  },
+  {
+    id: "FC-002", code: "FC-CDS-01", name: "Kênh số — Chuyển đổi số",
+    desc: "Số hóa quy trình giao dịch qua kênh trực tuyến.",
+    layer: "Strategic", sbu: "Digital", createdAt: "20-07-2026", createdBy: "Phạm Thanh Hùng",
+    approvedAt: "", approvedBy: "", status: "Draft",
+    daci: { driver: "Phạm Thanh Hùng", approver: "Lê Minh Quân", contributor: "", informed: "" },
+    auditLog: [{ id: "L9", action: "Tạo FC", actor: "Phạm Thanh Hùng", actorRole: "FCM", at: "20-07-2026", note: "" }],
+    oms: [],
+  },
+];
+
+// ---- Reason modal (dùng cho Từ chối / Đề nghị đóng — cần nhập lý do) ----
+function ReasonModal({ open, title, onClose, onConfirm }) {
+  const [reason, setReason] = useState("");
+  return (
+    <Modal open={open} onClose={onClose} title={title} sub="Vui lòng nhập lý do để tiếp tục."
+      footer={<>
+        <Button tone="ghost" onClick={onClose}>Hủy</Button>
+        <Button tone="primary" onClick={() => { onConfirm(reason); setReason(""); }}>Xác nhận</Button>
+      </>}>
+      <TextAreaField value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Nhập lý do…" rows={3} dense={false} />
+    </Modal>
+  );
+}
+
+function AuditLogList({ entries }) {
+  if (!entries || entries.length === 0) return <p className="text-[12.5px] text-[#A3A3A3] italic px-4 py-3">Chưa có nhật ký.</p>;
+  return (
+    <ul className="divide-y divide-[#EBEBEB]">
+      {[...entries].reverse().map(e => (
+        <li key={e.id} className="px-4 py-2.5 flex items-start gap-3 text-[12.5px]">
+          <span className="w-16 shrink-0 text-[#A3A3A3] font-mono">{e.at}</span>
+          <div className="min-w-0">
+            <p className="text-[#161616]"><span className="font-semibold">{e.action}</span> — {e.actor} <span className="text-[#A3A3A3]">({e.actorRole})</span></p>
+            {e.note && <p className="text-[#737373] mt-0.5">Lý do: {e.note}</p>}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Breadcrumb({ items }) {
+  return (
+    <div className="flex items-center gap-1.5 text-[13px] flex-wrap">
+      {items.map((it, i) => (
+        <React.Fragment key={i}>
+          {i > 0 && <Icon name="chevron_right" size={15} className="text-[#DADADA]" />}
+          {it.onClick ? (
+            <button onClick={it.onClick} className="text-[#3A9487] font-semibold hover:underline">{it.label}</button>
+          ) : (
+            <span className="text-[#161616] font-semibold">{it.label}</span>
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+// ---- Create modals ----
+function CreateFCModal({ open, onClose, onCreate }) {
+  const [form, setForm] = useState({ name: "", desc: "", layer: "Core", sbu: "" });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const submit = () => { if (!form.name.trim()) return; onCreate(form); setForm({ name: "", desc: "", layer: "Core", sbu: "" }); };
+  return (
+    <Modal open={open} onClose={onClose} title="Tạo FC mới" sub="Kích hoạt một Function Catalog mới, trạng thái khởi tạo Draft."
+      footer={<><Button tone="ghost" onClick={onClose}>Hủy</Button><Button tone="primary" onClick={submit}>Tạo FC</Button></>}>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Tên FC <span className="text-red-500">*</span></label>
+          <TextField value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="VD: Vùng Vàng — Chăm sóc khách hàng" dense={false} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Mô tả</label>
+          <TextAreaField value={form.desc} onChange={(e) => set("desc", e.target.value)} placeholder="Mô tả mục đích của FC…" rows={2} dense={false} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Layer FC</label>
+            <div className="flex gap-2">
+              {["Core", "Strategic"].map(l => (
+                <button key={l} type="button" onClick={() => set("layer", l)}
+                  className={`text-[12.5px] font-semibold rounded-lg px-3 py-2 ring-1 transition-colors ${form.layer === l ? "bg-[#EBF6F3] ring-[#3A9487] text-[#3A9487]" : "bg-white ring-[#DADADA] text-[#737373] hover:ring-[#3A9487]"}`}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">SBU</label>
+            <TextField value={form.sbu} onChange={(e) => set("sbu", e.target.value)} placeholder="VD: Retail, Digital…" dense={false} />
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function CreateOMModal({ open, onClose, onCreate }) {
+  const [form, setForm] = useState({ name: "", desc: "", accountable: "" });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const submit = () => { if (!form.name.trim()) return; onCreate(form); setForm({ name: "", desc: "", accountable: "" }); };
+  return (
+    <Modal open={open} onClose={onClose} title="Tạo OM mới" sub="Xác định cổng kiểm soát độc lập và Accountable (A) cho OM."
+      footer={<><Button tone="ghost" onClick={onClose}>Hủy</Button><Button tone="primary" onClick={submit}>Tạo OM</Button></>}>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Tên OM <span className="text-red-500">*</span></label>
+          <TextField value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="VD: Vận hành tổng đài" dense={false} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Mô tả</label>
+          <TextAreaField value={form.desc} onChange={(e) => set("desc", e.target.value)} placeholder="Mô tả mục đích của OM…" rows={2} dense={false} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Accountable (A)</label>
+          <TextField value={form.accountable} onChange={(e) => set("accountable", e.target.value)} placeholder="Tên người chịu trách nhiệm chính…" dense={false} />
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function CreateODModal({ open, onClose, onCreate, role }) {
+  const [form, setForm] = useState({ name: "", desc: "", r: "", a: "", frequency: "weekly" });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const submit = () => { if (!form.name.trim()) return; onCreate(form); setForm({ name: "", desc: "", r: "", a: "", frequency: "weekly" }); };
+  const viaAOfOM = role === "FCM" || role === "FDHead"; // đại diện A của OM khai báo trực tiếp -> vào thẳng Reviewed
+  return (
+    <Modal open={open} onClose={onClose} title="Tạo OD mới"
+      sub={viaAOfOM ? "Khai báo bởi A của OM — OD vào thẳng trạng thái Reviewed." : "IC khai báo — OD cần trình duyệt trước khi vận hành."}
+      footer={<><Button tone="ghost" onClick={onClose}>Hủy</Button><Button tone="primary" onClick={submit}>Tạo OD</Button></>}>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Tên OD <span className="text-red-500">*</span></label>
+          <TextField value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="VD: Xử lý khiếu nại khách hàng" dense={false} />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Mô tả</label>
+          <TextAreaField value={form.desc} onChange={(e) => set("desc", e.target.value)} placeholder="Mô tả công việc vận hành…" rows={2} dense={false} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Responsible (R)</label>
+            <TextField value={form.r} onChange={(e) => set("r", e.target.value)} placeholder="Người thực thi…" dense={false} />
+          </div>
+          <div>
+            <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Accountable (A)</label>
+            <TextField value={form.a} onChange={(e) => set("a", e.target.value)} placeholder="Người phê duyệt…" dense={false} />
+          </div>
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-wider font-bold text-[#737373] mb-1.5">Tần suất</label>
+          <div className="flex gap-2 flex-wrap">
+            {["daily", "weekly", "monthly", "quarterly"].map(f => (
+              <button key={f} type="button" onClick={() => set("frequency", f)}
+                className={`text-[12.5px] font-semibold rounded-lg px-3 py-1.5 ring-1 transition-colors ${form.frequency === f ? "bg-[#EBF6F3] ring-[#3A9487] text-[#3A9487]" : "bg-white ring-[#DADADA] text-[#737373] hover:ring-[#3A9487]"}`}>
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ---- Main module ----
+function FCModule({ role }) {
+  const [fcs, setFcs] = useState(() => cloneTree(FC_SEED));
+  const [selFcId, setSelFcId] = useState(null);
+  const [selOmId, setSelOmId] = useState(null);
+  const [odPanel, setOdPanel] = useState(null); // { fcId, omId, odId }
+  const [createFCOpen, setCreateFCOpen] = useState(false);
+  const [createOMOpen, setCreateOMOpen] = useState(false);
+  const [createODOpen, setCreateODOpen] = useState(false);
+  const [reasonCtx, setReasonCtx] = useState(null); // { title, onConfirm }
+
+  const fc = fcs.find(f => f.id === selFcId) || null;
+  const om = fc ? fc.oms.find(o => o.id === selOmId) : null;
+  const odCtx = odPanel && fcs.find(f => f.id === odPanel.fcId);
+  const omCtx = odCtx && odCtx.oms.find(o => o.id === odPanel.omId);
+  const od = omCtx && omCtx.ods.find(d => d.id === odPanel.odId);
+
+  const withFC = (fcId, mutator) => setFcs(list => {
+    const next = cloneTree(list);
+    const target = next.find(f => f.id === fcId);
+    if (target) mutator(target);
+    return next;
+  });
+  const withOM = (fcId, omId, mutator) => withFC(fcId, (f) => { const o = f.oms.find(x => x.id === omId); if (o) mutator(o, f); });
+  const withOD = (fcId, omId, odId, mutator) => withOM(fcId, omId, (o) => { const d = o.ods.find(x => x.id === odId); if (d) mutator(d, o); });
+
+  // ---- FC actions ----
+  const fcActions = (f) => {
+    const a = [];
+    if (role === "FCM" && f.status === "Draft") { a.push({ id: "submit", label: "Gửi duyệt" }); a.push({ id: "delete", label: "Xóa", tone: "outline" }); }
+    if (role === "EXCO" && f.status === "Reviewing") { a.push({ id: "approve", label: "Duyệt" }); a.push({ id: "reject", label: "Từ chối", tone: "outline", needReason: true }); }
+    if (role === "FCM" && f.status === "Active") a.push({ id: "requestClose", label: "Đề nghị đóng", tone: "outline", needReason: true });
+    if (role === "EXCO" && f.status === "Closing") { a.push({ id: "approveClose", label: "Duyệt đóng" }); a.push({ id: "rejectClose", label: "Từ chối", tone: "outline", needReason: true }); }
+    return a;
+  };
+  const runFCAction = (f, actionId, reason = "") => {
+    withFC(f.id, (t) => {
+      if (actionId === "submit") { t.status = "Reviewing"; t.auditLog.push(logEntry("Gửi duyệt FC", role)); }
+      if (actionId === "delete") { t.status = "Inactive"; t.auditLog.push(logEntry("Xóa FC", role)); }
+      if (actionId === "approve") { t.status = "Active"; t.approvedAt = TODAY; t.approvedBy = ROLE_USERS.EXCO.name; t.auditLog.push(logEntry("Duyệt FC", role)); }
+      if (actionId === "reject") { t.status = "Draft"; t.auditLog.push(logEntry("Từ chối FC", role, reason)); }
+      if (actionId === "requestClose") { t.status = "Closing"; t.auditLog.push(logEntry("Đề nghị đóng FC", role, reason)); }
+      if (actionId === "approveClose") { t.status = "Closed"; t.auditLog.push(logEntry("Duyệt đóng FC", role)); }
+      if (actionId === "rejectClose") { t.status = "Active"; t.auditLog.push(logEntry("Từ chối đóng FC", role, reason)); }
+    });
+  };
+
+  // ---- OM actions ----
+  const omActions = (o) => {
+    const a = [];
+    if (role === "FCM" && o.status === "Draft") { a.push({ id: "activate", label: "Kích hoạt OM" }); a.push({ id: "delete", label: "Xóa", tone: "outline" }); }
+    if (role === "FCM" && o.status === "Active") a.push({ id: "close", label: "Đóng OM", tone: "outline" });
+    return a;
+  };
+  const runOMAction = (f, o, actionId) => {
+    if (actionId === "delete" && o.ods.length > 0) { alert("Không thể xóa OM còn OD đang hoạt động."); return; }
+    if (actionId === "close" && o.ods.some(d => d.status === "Inprogress")) { alert("Không thể đóng OM khi còn OD đang Inprogress."); return; }
+    withOM(f.id, o.id, (t) => {
+      if (actionId === "activate") { t.status = "Active"; t.auditLog.push(logEntry("Kích hoạt OM", role)); }
+      if (actionId === "delete") { t.status = "Inactive"; t.auditLog.push(logEntry("Xóa OM", role)); }
+      if (actionId === "close") { t.status = "Closed"; t.auditLog.push(logEntry("Đóng OM", role)); }
+    });
+  };
+  const toggleChecker = (f, o, kind) => {
+    withOM(f.id, o.id, (t) => {
+      t.checkers[kind].checked = !t.checkers[kind].checked;
+      t.checkers[kind].assignee = ROLE_USERS[role].name;
+      t.auditLog.push(logEntry(`${kind === "resource" ? "Check nguồn lực" : "Check chuyên môn"}`, role));
+    });
+  };
+
+  // ---- OD actions ----
+  const odActions = (d) => {
+    const a = [];
+    if (role === "IC" && d.status === "Draft") a.push({ id: "submit", label: "Trình duyệt" });
+    if (role === "FCM" && d.status === "Reviewing") { a.push({ id: "approve", label: "Duyệt" }); a.push({ id: "reject", label: "Từ chối", tone: "outline", needReason: true }); }
+    if (role === "FCM" && d.status === "Reviewed") a.push({ id: "requestResource", label: "Yêu cầu check nguồn lực" });
+    if (role === "FDHead" && d.status === "Checking_resource") a.push({ id: "assign", label: "Xác nhận & Gán Assigned" });
+    if (role === "IC" && d.status === "Assigned") a.push({ id: "operate", label: "Kích hoạt vận hành" });
+    if (role === "IC" && d.status === "Inprogress") a.push({ id: "pause", label: "Tạm dừng", tone: "outline" });
+    if (role === "IC" && d.status === "Paused") a.push({ id: "operate", label: "Vận hành lại" });
+    if (d.status === "Draft" && (role === "IC" || role === "FCM")) a.push({ id: "delete", label: "Xóa", tone: "outline" });
+    if (role === "FCM" && !["Closing", "Closed", "Inactive"].includes(d.status)) a.push({ id: "requestClose", label: "Yêu cầu đóng", tone: "outline", needReason: true });
+    if (role === "FCM" && d.status === "Closing") a.push({ id: "approveClose", label: "Duyệt đóng" });
+    return a;
+  };
+  const runODAction = (f, o, d, actionId, reason = "") => {
+    withOD(f.id, o.id, d.id, (t) => {
+      if (actionId === "submit") { t.status = "Reviewing"; t.auditLog.push(logEntry("Trình duyệt OD", role)); }
+      if (actionId === "approve") { t.status = "Reviewed"; t.approvedAt = TODAY; t.approvedBy = ROLE_USERS[role].name; t.auditLog.push(logEntry("Duyệt OD", role)); }
+      if (actionId === "reject") { t.status = "Draft"; t.auditLog.push(logEntry("Từ chối OD", role, reason)); }
+      if (actionId === "requestResource") { t.status = "Checking_resource"; t.auditLog.push(logEntry("Yêu cầu check nguồn lực", role)); }
+      if (actionId === "assign") { t.status = "Assigned"; t.auditLog.push(logEntry("Gán Assigned", role)); }
+      if (actionId === "operate") { t.status = "Inprogress"; t.auditLog.push(logEntry("Kích hoạt vận hành OD", role)); }
+      if (actionId === "pause") { t.status = "Paused"; t.auditLog.push(logEntry("Tạm dừng OD", role)); }
+      if (actionId === "delete") { t.status = "Inactive"; t.auditLog.push(logEntry("Xóa OD", role)); }
+      if (actionId === "requestClose") { t.status = "Closing"; t.auditLog.push(logEntry("Yêu cầu đóng OD", role, reason)); }
+      if (actionId === "approveClose") { t.status = "Closed"; t.auditLog.push(logEntry("Duyệt đóng OD", role)); }
+    });
+  };
+  const updateKPI = (f, o, d, kpiId, value) => {
+    withOD(f.id, o.id, d.id, (t) => {
+      const k = t.kpis.find(x => x.id === kpiId);
+      if (k) { k.current = value; t.auditLog.push(logEntry(`Cập nhật KPI ${k.name}`, role, `Kỳ hiện tại: ${value}${k.unit}`)); }
+    });
+  };
+
+  const runReasoned = (label, onConfirm) => setReasonCtx({ title: label, onConfirm: (reason) => { onConfirm(reason); setReasonCtx(null); } });
+
+  const createFC = (form) => {
+    const id = genId("FC");
+    setFcs(list => [...list, {
+      id, code: `FC-${id}`, name: form.name, desc: form.desc, layer: form.layer, sbu: form.sbu,
+      createdAt: TODAY, createdBy: ROLE_USERS[role].name, approvedAt: "", approvedBy: "", status: "Draft",
+      daci: { driver: ROLE_USERS.FCM.name, approver: ROLE_USERS.EXCO.name, contributor: "", informed: "" },
+      auditLog: [logEntry("Tạo FC", role)], oms: [],
+    }]);
+    setCreateFCOpen(false);
+  };
+  const createOM = (form) => {
+    if (!fc) return;
+    const id = genId("OM");
+    withFC(fc.id, (t) => t.oms.push({
+      id, code: `OM-${id}`, name: form.name, desc: form.desc, fcId: fc.id,
+      createdAt: TODAY, createdBy: ROLE_USERS[role].name, accountable: form.accountable,
+      checkers: { resource: { assignee: "", checked: false }, expertise: { assignee: "", checked: false } },
+      status: "Draft", auditLog: [logEntry("Tạo OM", role)], ods: [],
+    }));
+    setCreateOMOpen(false);
+  };
+  const createOD = (form) => {
+    if (!fc || !om) return;
+    const id = genId("OD");
+    const viaAOfOM = role === "FCM" || role === "FDHead";
+    withOM(fc.id, om.id, (t) => t.ods.push({
+      id, code: `OD-${id}`, name: form.name, desc: form.desc, omId: om.id,
+      createdAt: TODAY, createdBy: ROLE_USERS[role].name,
+      approvedAt: viaAOfOM ? TODAY : "", approvedBy: viaAOfOM ? ROLE_USERS[role].name : "",
+      raci: { R: form.r, A: form.a, C: "", I: "" }, kpis: [], inputRef: "", frequency: form.frequency,
+      status: viaAOfOM ? "Reviewed" : "Draft",
+      auditLog: [logEntry(viaAOfOM ? "Tạo OD (A của OM khai báo)" : "Tạo OD (IC khai báo)", role)],
+    }));
+    setCreateODOpen(false);
+  };
+
+  // ---- Level 0: FC list ----
+  if (!fc) {
+    return (
+      <div className="p-6 space-y-5 max-w-[1200px] animate-fade-in">
+        <div className="flex items-start justify-between flex-wrap gap-3">
+          <div>
+            <p className="font-display font-bold text-[20px] text-[#161616]">FC Catalog</p>
+            <p className="text-[13px] text-[#737373] mt-1 max-w-[600px]">Danh mục Function Catalog — cấu trúc FC → OM → OD theo luồng IPO.</p>
+          </div>
+          {role === "FCM" && <Button tone="primary" size="sm" icon="add" onClick={() => setCreateFCOpen(true)}>Tạo FC</Button>}
+        </div>
+
+        <div className="rounded-xl ring-1 ring-[#DADADA] shadow-soft overflow-hidden">
+          <div className="divide-y divide-[#EBEBEB]">
+            {fcs.map(f => (
+              <button key={f.id} onClick={() => setSelFcId(f.id)}
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F5F5F5] transition-colors text-left">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-display font-semibold text-[15px] text-[#161616] truncate">{f.name}</p>
+                    <StatusPill status={f.status} />
+                  </div>
+                  <p className="text-[12.5px] text-[#737373] mt-0.5 truncate">{f.desc}</p>
+                  <div className="flex items-center gap-3 mt-2 text-[11.5px] text-[#A3A3A3]">
+                    <span>{f.code}</span><span>·</span><span>{f.layer}</span><span>·</span><span>{f.sbu}</span>
+                    <span>·</span><span>Driver: {f.daci.driver}</span>
+                    <span>·</span><span>{f.oms.length} OM</span>
+                  </div>
+                </div>
+                <Icon name="chevron_right" size={20} className="text-[#DADADA] shrink-0" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <CreateFCModal open={createFCOpen} onClose={() => setCreateFCOpen(false)} onCreate={createFC} />
+      </div>
+    );
+  }
+
+  // ---- Level 2: OM detail (OD list) ----
+  if (om) {
+    return (
+      <div className="p-6 space-y-5 max-w-[1200px] animate-fade-in">
+        <Breadcrumb items={[
+          { label: "FC Catalog", onClick: () => { setSelFcId(null); setSelOmId(null); } },
+          { label: fc.name, onClick: () => setSelOmId(null) },
+          { label: om.name },
+        ]} />
+
+        <Card padded className="p-5">
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <p className="font-display font-bold text-[18px] text-[#161616]">{om.name}</p>
+                <StatusPill status={om.status} />
+              </div>
+              <p className="text-[13px] text-[#737373] mt-1">{om.desc}</p>
+              <div className="flex items-center gap-3 mt-2 text-[12px] text-[#A3A3A3]">
+                <span>{om.code}</span><span>·</span><span>Accountable: {om.accountable || "—"}</span><span>·</span><span>Tạo: {om.createdAt} bởi {om.createdBy}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {omActions(om).map(a => (
+                <Button key={a.id} tone={a.tone || "primary"} size="sm"
+                  onClick={() => a.id === "close" ? runReasoned("Đóng OM", () => runOMAction(fc, om, "close")) : runOMAction(fc, om, a.id)}>
+                  {a.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="rounded-lg ring-1 ring-[#EBEBEB] p-3">
+              <p className="text-[10.5px] uppercase tracking-wider font-bold text-[#A3A3A3] mb-1.5">Check nguồn lực (FD Head)</p>
+              <label className="flex items-center gap-2 text-[13px] cursor-pointer">
+                <input type="checkbox" checked={om.checkers.resource.checked} onChange={() => toggleChecker(fc, om, "resource")}
+                  disabled={role !== "FDHead"} className="w-4 h-4 accent-[#3A9487]" />
+                {om.checkers.resource.checked ? `Đã check bởi ${om.checkers.resource.assignee}` : "Chưa check"}
+              </label>
+            </div>
+            <div className="rounded-lg ring-1 ring-[#EBEBEB] p-3">
+              <p className="text-[10.5px] uppercase tracking-wider font-bold text-[#A3A3A3] mb-1.5">Check chuyên môn</p>
+              <label className="flex items-center gap-2 text-[13px] cursor-pointer">
+                <input type="checkbox" checked={om.checkers.expertise.checked} onChange={() => toggleChecker(fc, om, "expertise")}
+                  disabled={role !== "FDHead"} className="w-4 h-4 accent-[#3A9487]" />
+                {om.checkers.expertise.checked ? `Đã check bởi ${om.checkers.expertise.assignee}` : "Chưa check"}
+              </label>
+            </div>
+          </div>
+        </Card>
+
+        <div className="flex items-center justify-between">
+          <p className="font-display font-bold text-[15px] text-[#161616]">Danh sách OD ({om.ods.length})</p>
+          {(role === "IC" || role === "FCM" || role === "FDHead") && om.status === "Active" && (
+            <Button tone="primary" size="sm" icon="add" onClick={() => setCreateODOpen(true)}>Tạo OD</Button>
+          )}
+        </div>
+
+        <div className="rounded-xl ring-1 ring-[#DADADA] shadow-soft overflow-hidden">
+          {om.ods.length === 0 ? (
+            <p className="px-5 py-8 text-center text-[#A3A3A3] text-[14px]">Chưa có OD nào trong OM này.</p>
+          ) : (
+            <div className="divide-y divide-[#EBEBEB]">
+              {om.ods.map(d => (
+                <button key={d.id} onClick={() => setOdPanel({ fcId: fc.id, omId: om.id, odId: d.id })}
+                  className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F5F5F5] transition-colors text-left">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-display font-semibold text-[14.5px] text-[#161616] truncate">{d.name}</p>
+                      <StatusPill status={d.status} />
+                    </div>
+                    <div className="flex items-center gap-3 mt-1.5 text-[11.5px] text-[#A3A3A3]">
+                      <span>{d.code}</span><span>·</span><span>R: {d.raci.R || "—"}</span><span>·</span><span>A: {d.raci.A || "—"}</span>
+                      <span>·</span><span>{d.frequency}</span>
+                    </div>
+                  </div>
+                  <Icon name="chevron_right" size={18} className="text-[#DADADA] shrink-0" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <CreateODModal open={createODOpen} onClose={() => setCreateODOpen(false)} onCreate={createOD} role={role} />
+        {od && (
+          <ODPanel fc={fc} om={om} od={od} role={role} onClose={() => setOdPanel(null)}
+            actions={odActions(od)} onAction={(actionId) => {
+              const act = odActions(od).find(a => a.id === actionId);
+              if (act && act.needReason) runReasoned(act.label, (reason) => runODAction(fc, om, od, actionId, reason));
+              else runODAction(fc, om, od, actionId);
+            }}
+            onUpdateKPI={(kpiId, val) => updateKPI(fc, om, od, kpiId, val)} />
+        )}
+      </div>
+    );
+  }
+
+  // ---- Level 1: FC detail (OM list) ----
+  return (
+    <div className="p-6 space-y-5 max-w-[1200px] animate-fade-in">
+      <Breadcrumb items={[
+        { label: "FC Catalog", onClick: () => setSelFcId(null) },
+        { label: fc.name },
+      ]} />
+
+      <Card padded className="p-5">
+        <div className="flex items-start justify-between flex-wrap gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="font-display font-bold text-[18px] text-[#161616]">{fc.name}</p>
+              <StatusPill status={fc.status} />
+            </div>
+            <p className="text-[13px] text-[#737373] mt-1 max-w-[560px]">{fc.desc}</p>
+            <div className="flex items-center gap-3 mt-2 text-[12px] text-[#A3A3A3] flex-wrap">
+              <span>{fc.code}</span><span>·</span><span>{fc.layer}</span><span>·</span><span>{fc.sbu}</span>
+              <span>·</span><span>Driver: {fc.daci.driver}</span><span>·</span><span>Approver: {fc.daci.approver}</span>
+              <span>·</span><span>Tạo: {fc.createdAt}</span>
+              {fc.approvedAt && <><span>·</span><span>Duyệt: {fc.approvedAt}</span></>}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {fcActions(fc).map(a => (
+              <Button key={a.id} tone={a.tone || "primary"} size="sm"
+                onClick={() => a.needReason ? runReasoned(a.label, (reason) => runFCAction(fc, a.id, reason)) : runFCAction(fc, a.id)}>
+                {a.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      <div className="flex items-center justify-between">
+        <p className="font-display font-bold text-[15px] text-[#161616]">Danh sách OM ({fc.oms.length})</p>
+        {role === "FCM" && fc.status === "Active" && (
+          <Button tone="primary" size="sm" icon="add" onClick={() => setCreateOMOpen(true)}>Tạo OM</Button>
+        )}
+      </div>
+
+      <div className="rounded-xl ring-1 ring-[#DADADA] shadow-soft overflow-hidden">
+        {fc.oms.length === 0 ? (
+          <p className="px-5 py-8 text-center text-[#A3A3A3] text-[14px]">Chưa có OM nào trong FC này.</p>
+        ) : (
+          <div className="divide-y divide-[#EBEBEB]">
+            {fc.oms.map(o => (
+              <button key={o.id} onClick={() => setSelOmId(o.id)}
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#F5F5F5] transition-colors text-left">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-display font-semibold text-[14.5px] text-[#161616] truncate">{o.name}</p>
+                    <StatusPill status={o.status} />
+                  </div>
+                  <div className="flex items-center gap-3 mt-1.5 text-[11.5px] text-[#A3A3A3]">
+                    <span>{o.code}</span><span>·</span><span>Accountable: {o.accountable || "—"}</span><span>·</span><span>{o.ods.length} OD</span>
+                  </div>
+                </div>
+                <Icon name="chevron_right" size={18} className="text-[#DADADA] shrink-0" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <CreateOMModal open={createOMOpen} onClose={() => setCreateOMOpen(false)} onCreate={createOM} />
+      {reasonCtx && <ReasonModal open={true} title={reasonCtx.title} onClose={() => setReasonCtx(null)} onConfirm={reasonCtx.onConfirm} />}
+    </div>
+  );
+}
+
+function ODPanel({ fc, om, od, role, onClose, actions, onAction, onUpdateKPI }) {
+  return (
+    <Modal open={true} onClose={onClose} size="lg"
+      title={od.name}
+      sub={`${od.code} · ${om.name} · ${fc.name}`}
+      footer={<>
+        <Button tone="ghost" onClick={onClose}>Đóng</Button>
+        {actions.map(a => (
+          <Button key={a.id} tone={a.tone || "primary"} onClick={() => onAction(a.id)}>{a.label}</Button>
+        ))}
+      </>}>
+      <div className="space-y-5">
+        <div className="flex items-center gap-2"><StatusPill status={od.status} size="md" /><span className="text-[12.5px] text-[#737373]">Tần suất: {od.frequency}</span></div>
+        <p className="text-[13.5px] text-[#2A2A2A]">{od.desc}</p>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-lg ring-1 ring-[#EBEBEB] p-3">
+            <p className="text-[10.5px] uppercase tracking-wider font-bold text-[#A3A3A3] mb-1.5">RACI</p>
+            <p className="text-[13px] text-[#161616]">R: {od.raci.R || "—"}</p>
+            <p className="text-[13px] text-[#161616]">A: {od.raci.A || "—"}</p>
+            <p className="text-[13px] text-[#161616]">C: {od.raci.C || "—"}</p>
+            <p className="text-[13px] text-[#161616]">I: {od.raci.I || "—"}</p>
+          </div>
+          <div className="rounded-lg ring-1 ring-[#EBEBEB] p-3">
+            <p className="text-[10.5px] uppercase tracking-wider font-bold text-[#A3A3A3] mb-1.5">Thời gian</p>
+            <p className="text-[13px] text-[#161616]">Tạo: {od.createdAt} bởi {od.createdBy}</p>
+            <p className="text-[13px] text-[#161616]">Duyệt: {od.approvedAt || "—"} {od.approvedBy && `bởi ${od.approvedBy}`}</p>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[10.5px] uppercase tracking-wider font-bold text-[#A3A3A3] mb-2">KPI</p>
+          {od.kpis.length === 0 ? (
+            <p className="text-[12.5px] text-[#A3A3A3] italic">Chưa gán KPI.</p>
+          ) : (
+            <div className="space-y-2">
+              {od.kpis.map(k => (
+                <div key={k.id} className="flex items-center gap-3 rounded-lg ring-1 ring-[#EBEBEB] p-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-[#161616]">{k.name}</p>
+                    <p className="text-[11.5px] text-[#A3A3A3]">Target: {k.target}{k.unit} · Kỳ: {k.period}</p>
+                  </div>
+                  {role === "IC" && od.status === "Inprogress" ? (
+                    <div className="w-24">
+                      <TextField value={String(k.current)} onChange={(e) => onUpdateKPI(k.id, e.target.value.replace(/[^0-9.]/g, ""))} placeholder="Giá trị" />
+                    </div>
+                  ) : (
+                    <p className="font-display font-bold text-[15px] text-[#3A9487]">{k.current}{k.unit}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <p className="text-[10.5px] uppercase tracking-wider font-bold text-[#A3A3A3] mb-2">Nhật ký</p>
+          <div className="rounded-lg ring-1 ring-[#EBEBEB] overflow-hidden">
+            <AuditLogList entries={od.auditLog} />
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function ComingSoon({ route, subroute }) {
+  const meta = NAV_META[route] || {};
+  const modules = NAV_TREE[route];
+  const activeModule = modules ? modules.find(m => m.id === subroute) : null;
+  const label = activeModule ? `${meta.title} · ${activeModule.label}` : meta.title;
+  return (
+    <div className="min-h-full flex items-center justify-center p-8 animate-fade-in">
+      <div className="max-w-[420px] text-center">
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-[#EBF6F3] flex items-center justify-center mb-5">
+          <Icon name="construction" size={30} className="text-[#3A9487]" />
+        </div>
+        <p className="font-display font-bold text-[20px] text-[#161616] mb-1.5">{label}</p>
+        <p className="text-[14px] text-[#737373] leading-relaxed mb-5">
+          Màn hình <span className="font-semibold text-[#161616]">{label}</span> đang được phát triển.
+          Nội dung chi tiết sẽ được cập nhật theo tài liệu yêu cầu tương ứng.
+        </p>
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C4E5DF] text-[#161616]">
+          <Icon name="hourglass_top" size={13} /> Đang phát triển
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// =============== App shell ===============
+function App() {
+  const [route, setRoute] = useState("dashboard");
+  const [subroute, setSubroute] = useState(null);
+  const [compact, setCompact] = useState(false);
+  const [role, setRole] = useState("IC"); // 'IC' | 'FCM' | 'FDHead' — Đóng vai
+
+  const modules = NAV_TREE[route];
+
+  const handleNavigate = (id) => {
+    setRoute(id);
+    const nextModules = NAV_TREE[id];
+    setSubroute(nextModules && nextModules.length ? nextModules[0].id : null);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F5F5F5] flex gap-3 p-3">
+      <Sidebar activeItem={route} onNavigate={handleNavigate} compact={compact} setCompact={setCompact} />
+      <main className="flex-1 min-w-0 warm-main flex flex-col h-[calc(100vh-1.5rem)] overflow-hidden">
+        <TopBar compact={compact} setCompact={setCompact} route={route} subroute={subroute} role={role} onRoleChange={setRole} />
+        <ContextBar modules={modules} subroute={subroute} onNavigate={setSubroute} />
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
+          {subroute === "dgo/icm" ? <ICMScreen role={role} />
+            : subroute === "dwork/fc" ? <FCModule role={role} />
+            : <ComingSoon route={route} subroute={subroute} />}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
