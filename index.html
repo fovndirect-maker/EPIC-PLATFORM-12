@@ -659,9 +659,9 @@ const ICM_SEED = {
       { name: "Problem Solving", sub: "Tư duy giải quyết vấn đề phức tạp", type: "Behavior", cert: "Lean Six Sigma Belt", ev: "Phân tích nguyên nhân gốc rễ sự cố thất thoát dữ liệu Vùng Vàng.", self: 4, sm: 4, rated: true },
     ],
     dc: [
-      { name: "Product Discovery, Prioritization & PRD", ev: "Dựng luồng nghiệp vụ chi tiết và hoàn thiện PRD cho cổng thanh toán IPP.", self: 4, rated: true },
-      { name: "Feature Launch & Post-launch Iteration", ev: "Tổ chức triển khai và tối ưu các chỉ số chuyển đổi sau ra mắt cổng IPP.", self: 4, rated: true },
-      { name: "Cross-team Dependency & Status Mgmt", ev: "Quản lý phụ thuộc chặt chẽ và phối hợp nhịp nhàng giữa team Core và Front.", self: 4, rated: true },
+      { name: "Product Discovery, Prioritization & PRD", sub: "Khám phá nhu cầu · Ưu tiên hoá · Viết PRD", ev: "Dựng luồng nghiệp vụ chi tiết và hoàn thiện PRD cho cổng thanh toán IPP.", self: 4, rated: true },
+      { name: "Feature Launch & Post-launch Iteration", sub: "Triển khai tính năng · Tối ưu sau ra mắt", ev: "Tổ chức triển khai và tối ưu các chỉ số chuyển đổi sau ra mắt cổng IPP.", self: 4, rated: true },
+      { name: "Cross-team Dependency & Status Mgmt", sub: "Quản lý phụ thuộc & tiến độ liên team", ev: "Quản lý phụ thuộc chặt chẽ và phối hợp nhịp nhàng giữa team Core và Front.", self: 4, rated: true },
     ],
   },
   fs2: { fix: [], addon: [], dc: [] },
@@ -709,9 +709,9 @@ function SCTable({ title, sub, rows, group, editMode, onField, showAddRow, onAdd
     <ICMTableShell
       title={title} sub={sub}
       headers={[
-        { label: "Tên SC", width: removable ? "30%" : "34%" },
+        { label: "Tên SC", width: "32%" },
         { label: "Loại", width: "16%" },
-        { label: "Chứng chỉ", width: removable ? "44%" : "50%" },
+        { label: "Chứng chỉ", width: removable ? "42%" : "52%" },
         ...(removable ? [{ label: "", width: "44px", align: "center" }] : []),
       ]}
       footer={<>
@@ -769,8 +769,8 @@ function DCTable({ rows, editMode, onField }) {
     <ICMTableShell
       title="DC · Delivery Competence" sub="Sinh tự động từ FC/OC"
       headers={[
-        { label: "Tên DC", width: "30%" },
-        { label: "Minh chứng kết quả", width: "70%" },
+        { label: "Tên DC", width: "32%" },
+        { label: "Minh chứng kết quả", width: "68%" },
       ]}
     >
       {rows.length === 0 && (
@@ -778,7 +778,10 @@ function DCTable({ rows, editMode, onField }) {
       )}
       {rows.map((r, idx) => (
         <tr key={idx} className={`border-b border-[#EBEBEB] last:border-b-0 transition-colors hover:bg-[#F5F5F5] ${idx % 2 ? "bg-[#F5F5F5]/30" : "bg-white"}`}>
-          <td className="px-4 py-2.5 align-top font-semibold text-[#161616] text-[14px]">{r.name}</td>
+          <td className="px-4 py-2.5 align-top text-[14px]">
+            <p className="font-semibold text-[#161616]">{r.name}</p>
+            {r.sub && <p className="text-[12px] text-[#A3A3A3] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{r.sub}</p>}
+          </td>
           {editMode ? (
             <td className="px-4 py-2.5 align-top">
               <TextAreaField value={r.ev || ""} onChange={(e) => onField("dc", idx, "ev", e.target.value)} placeholder="Minh chứng kết quả…" rows={2} />
